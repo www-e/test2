@@ -90,7 +90,7 @@ describe('Replies API Route', () => {
 
     const request = {
       json: vi.fn().mockResolvedValue({
-        discussionId: 'nonexistent',
+        discussionId: 'ckp4m6n890123abcdef456789', // Valid cuid format
         content: 'This is a test reply',
       }),
     } as unknown as NextRequest

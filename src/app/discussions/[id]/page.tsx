@@ -28,13 +28,14 @@ function LoadingSkeleton() {
   )
 }
 
-interface DiscussionPageProps {
-  params: {
+type DiscussionPageProps = {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function DiscussionPage({ params }: DiscussionPageProps) {
+export default async function DiscussionPage(props: DiscussionPageProps) {
+  const params = await props.params;
   const session = await getServerSession(authOptions)
   const discussion = await prisma.discussion.findUnique({
     where: { id: params.id },
