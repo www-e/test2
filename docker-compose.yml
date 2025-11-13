@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: calculation-tree-app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://calcuser:calcpassword@db:5432/calcdb
+      - NEXTAUTH_SECRET=your-super-secret-jwt-key-change-in-production
+      - NEXTAUTH_URL=http://localhost:3000
+      - NODE_ENV=development
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    networks:
+      - app-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: calculation-tree-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=calcuser
+      - POSTGRES_PASSWORD=calcpassword
+      - POSTGRES_DB=calcdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calcuser -d calcdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
