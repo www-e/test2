@@ -1,5 +1,6 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
   reactStrictMode: true,
   webpack: (config, { isServer }) => {
     if (isServer) {
@@ -7,6 +8,7 @@ const nextConfig = {
     }
     return config;
   },
+  turbopack: {},
 }
 
-module.exports = nextConfig
+export default nextConfig
