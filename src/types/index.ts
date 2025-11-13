@@ -38,7 +38,7 @@ export interface DiscussionWithOperations {
     id: string
     username: string
   }
-  createdAt: string
+  createdAt: Date | string  // Prisma returns Date, but we might want string for API
   operations: OperationWithChildren[]
 }
 
@@ -51,6 +51,6 @@ export interface OperationWithChildren {
     id: string
     username: string
   }
-  createdAt: string
+  createdAt: Date | string  // Prisma returns Date, but we might want string for API
   children: OperationWithChildren[]
 }
