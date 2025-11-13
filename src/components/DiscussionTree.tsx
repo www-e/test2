@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { DiscussionWithReplies } from '@/types'
+import { DiscussionSummary } from '@/types'
 import DiscussionNode from './DiscussionNode'
 
 export default async function DiscussionTree() {
@@ -12,57 +12,12 @@ export default async function DiscussionTree() {
         },
       },
       replies: {
-        where: {
-          parentId: null,
+        // Only count replies, not include the full tree structure for performance
+        select: {
+          id: true,
         },
-        include: {
-          author: {
-            select: {
-              id: true,
-              username: true,
-            },
-          },
-          children: {
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                },
-              },
-              children: {
-                include: {
-                  author: {
-                    select: {
-                      id: true,
-                      username: true,
-                    },
-                  },
-                  children: {
-                    include: {
-                      author: {
-                        select: {
-                          id: true,
-                          username: true,
-                        },
-                      },
-                      children: {
-                        include: {
-                          author: {
-                            select: {
-                              id: true,
-                              username: true,
-                            },
-                          },
-                          children: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
+        where: {
+          parentId: null, // Only direct replies, not nested ones
         },
       },
     },
@@ -84,7 +39,7 @@ export default async function DiscussionTree() {
 
   return (
     <div className="space-y-6">
-      {discussions.map((discussion: DiscussionWithReplies) => (
+      {discussions.map((discussion: DiscussionSummary) => (
         <DiscussionNode key={discussion.id} discussion={discussion} />
       ))}
     </div>

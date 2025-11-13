@@ -9,8 +9,8 @@ import SessionProvider from '@/components/SessionProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Calculation Tree | Numeric Discussions',
-  description: 'A platform for creating and participating in calculation-based discussions',
+  title: 'Discussion Forum | Join the Conversation',
+  description: 'A platform for creating and participating in community discussions',
 }
 
 export default async function RootLayout({

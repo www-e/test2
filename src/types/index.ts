@@ -43,6 +43,19 @@ export interface DiscussionWithReplies {
   replies: ReplyWithChildren[]
 }
 
+// Simplified discussion type for list view (without full reply tree)
+export interface DiscussionSummary {
+  id: string
+  title: string
+  content: string
+  author: {
+    id: string
+    username: string
+  }
+  createdAt: Date | string
+  replies: { id: string }[] // Just reply IDs for count
+}
+
 export interface ReplyWithChildren {
   id: string
   content: string
