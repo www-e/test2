@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/db'
 import { authOptions } from '@/lib/auth'
-import { createOperationSchema } from '@/lib/validation'
-import { calculate, CalculationError } from '@/lib/calculations'
+import { createReplySchema } from '@/lib/validation'
 import { ApiResponse } from '@/types'
 
 /**
- * POST /api/operations
- * Create a new operation (reply) on a discussion or another operation
+ * POST /api/replies
+ * Create a new reply to a discussion or another reply
  * Requires authentication
  */
 export async function POST(request: NextRequest) {
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json()
-    const validation = createOperationSchema.safeParse(body)
+    const validation = createReplySchema.safeParse(body)
 
     if (!validation.success) {
       return NextResponse.json<ApiResponse>(
@@ -40,7 +39,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { discussionId, parentId, operationType, rightOperand } = validation.data
+    const { discussionId, parentId, content } = validation.data
 
     // Verify discussion exists
     const discussion = await prisma.discussion.findUnique({
@@ -57,66 +56,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Determine left operand (either starting number or parent operation result)
-    let leftOperand: number
-
+    // If parentId is provided, verify it exists and belongs to the same discussion
     if (parentId) {
-      // Operation on another operation
-      const parentOperation = await prisma.operation.findUnique({
+      const parentReply = await prisma.reply.findUnique({
         where: { id: parentId },
       })
 
-      if (!parentOperation) {
+      if (!parentReply) {
         return NextResponse.json<ApiResponse>(
           {
             success: false,
-            error: 'Parent operation not found',
+            error: 'Parent reply not found',
           },
           { status: 404 }
         )
       }
 
-      if (parentOperation.discussionId !== discussionId) {
+      if (parentReply.discussionId !== discussionId) {
         return NextResponse.json<ApiResponse>(
           {
             success: false,
-            error: 'Parent operation does not belong to this discussion',
+            error: 'Parent reply does not belong to this discussion',
           },
           { status: 400 }
         )
       }
-
-      leftOperand = parentOperation.result
-    } else {
-      // Operation on starting number
-      leftOperand = discussion.startNumber
     }
 
-    // Calculate result
-    let result: number
-    try {
-      result = calculate(leftOperand, operationType, rightOperand)
-    } catch (error) {
-      if (error instanceof CalculationError) {
-        return NextResponse.json<ApiResponse>(
-          {
-            success: false,
-            error: error.message,
-          },
-          { status: 400 }
-        )
-      }
-      throw error
-    }
-
-    // Create operation
-    const operation = await prisma.operation.create({
+    // Create reply
+    const reply = await prisma.reply.create({
       data: {
         discussionId,
         parentId: parentId || null,
-        operationType,
-        rightOperand,
-        result,
+        content,
         authorId: session.user.id,
       },
       include: {
@@ -132,17 +104,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<ApiResponse>(
       {
         success: true,
-        message: 'Operation created successfully',
-        data: operation,
+        message: 'Reply created successfully',
+        data: reply,
       },
       { status: 201 }
     )
   } catch (error) {
-    console.error('Create operation error:', error)
+    console.error('Create reply error:', error)
     return NextResponse.json<ApiResponse>(
       {
         success: false,
-        error: 'Failed to create operation',
+        error: 'Failed to create reply',
       },
       { status: 500 }
     )

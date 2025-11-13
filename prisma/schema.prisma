@@ -21,43 +21,42 @@ model User {
   updatedAt DateTime @updatedAt
 
   discussions Discussion[]
-  operations  Operation[]
+  replies     Reply[]
 
   @@map("users")
 }
 
 model Discussion {
   id          String   @id @default(cuid())
-  startNumber Float    // The starting number for calculation tree
+  title       String   // Discussion title
+  content     String   // Discussion content
   authorId    String
   author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  operations Operation[] // All operations on this discussion tree
+  replies     Reply[]  // All replies on this discussion
 
   @@map("discussions")
 }
 
-model Operation {
+model Reply {
   id            String   @id @default(cuid())
   discussionId  String
   discussion    Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
-  
-  // Self-referencing for tree structure
-  parentId      String?
-  parent        Operation?  @relation("OperationTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children      Operation[] @relation("OperationTree")
 
-  // Operation details
-  operationType String   // "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE"
-  rightOperand  Float    // User-chosen number (right side of operation)
-  result        Float    // Calculated result
+  // Self-referencing for nested replies
+  parentId      String?
+  parent        Reply?    @relation("ReplyTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children      Reply[]   @relation("ReplyTree")
+
+  // Reply content
+  content       String   // Reply content
 
   authorId      String
   author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  @@map("operations")
+  @@map("replies")
 }

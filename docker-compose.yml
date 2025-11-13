@@ -10,7 +10,7 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://calcuser:calcpassword@db:5432/calcdb
-      - NEXTAUTH_SECRET=your-super-secret-jwt-key-change-in-production
+      - NEXTAUTH_SECRET=sk_3b624216314d4e3288847b2898676c9445b71d6129974827a0461301a4467385
       - NEXTAUTH_URL=http://localhost:3000
       - NODE_ENV=development
     depends_on:

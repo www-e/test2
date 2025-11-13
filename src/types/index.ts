@@ -30,27 +30,26 @@ export interface ApiResponse<T = unknown> {
   message?: string
 }
 
-// Discussion with nested operations (recursive type)
-export interface DiscussionWithOperations {
+// Discussion with nested replies (recursive type)
+export interface DiscussionWithReplies {
   id: string
-  startNumber: number
+  title: string
+  content: string
   author: {
     id: string
     username: string
   }
   createdAt: Date | string  // Prisma returns Date, but we might want string for API
-  operations: OperationWithChildren[]
+  replies: ReplyWithChildren[]
 }
 
-export interface OperationWithChildren {
+export interface ReplyWithChildren {
   id: string
-  operationType: string
-  rightOperand: number
-  result: number
+  content: string
   author: {
     id: string
     username: string
   }
   createdAt: Date | string  // Prisma returns Date, but we might want string for API
-  children: OperationWithChildren[]
+  children: ReplyWithChildren[]
 }

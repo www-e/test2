@@ -12,8 +12,7 @@ interface ReplyFormProps {
 export default function ReplyForm({ discussionId, parentId }: ReplyFormProps) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-  const [operationType, setOperationType] = useState<string>('ADD')
-  const [rightOperand, setRightOperand] = useState('')
+  const [content, setContent] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -21,17 +20,20 @@ export default function ReplyForm({ discussionId, parentId }: ReplyFormProps) {
     e.preventDefault()
     setError('')
 
-    const numberValue = parseFloat(rightOperand)
+    if (!content.trim()) {
+      setError('Reply content is required')
+      return
+    }
 
-    if (isNaN(numberValue) || !isFinite(numberValue)) {
-      setError('Please enter a valid number')
+    if (content.length > 5000) {
+      setError('Content must be 5000 characters or less')
       return
     }
 
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/operations', {
+      const response = await fetch('/api/replies', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,22 +41,20 @@ export default function ReplyForm({ discussionId, parentId }: ReplyFormProps) {
         body: JSON.stringify({
           discussionId,
           parentId: parentId || null,
-          operationType,
-          rightOperand: numberValue,
+          content: content.trim(),
         }),
       })
 
       const data: ApiResponse = await response.json()
 
       if (!response.ok || !data.success) {
-        setError(data.error || 'Failed to create operation')
+        setError(data.error || 'Failed to create reply')
         setIsLoading(false)
         return
       }
 
-      // Reset form and refresh page to show new operation
-      setRightOperand('')
-      setOperationType('ADD')
+      // Reset form and refresh page to show new reply
+      setContent('')
       setIsOpen(false)
       router.refresh()
     } catch (err) {
@@ -83,30 +83,15 @@ export default function ReplyForm({ discussionId, parentId }: ReplyFormProps) {
           </div>
         )}
 
-        <div className="flex gap-2">
-          <select
-            value={operationType}
-            onChange={(e) => setOperationType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-            disabled={isLoading}
-          >
-            <option value="ADD">+ Add</option>
-            <option value="SUBTRACT">- Subtract</option>
-            <option value="MULTIPLY">× Multiply</option>
-            <option value="DIVIDE">÷ Divide</option>
-          </select>
-
-          <input
-            type="number"
-            step="any"
-            value={rightOperand}
-            onChange={(e) => setRightOperand(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-            placeholder="Enter number"
-            required
-            disabled={isLoading}
-          />
-        </div>
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          rows={3}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+          placeholder="Write your reply..."
+          required
+          disabled={isLoading}
+        />
 
         <div className="flex gap-2">
           <button
@@ -114,7 +99,7 @@ export default function ReplyForm({ discussionId, parentId }: ReplyFormProps) {
             disabled={isLoading}
             className="flex-1 bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {isLoading ? 'Adding...' : 'Add Operation'}
+            {isLoading ? 'Posting...' : 'Post Reply'}
           </button>
           <button
             type="button"

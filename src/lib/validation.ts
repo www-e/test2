@@ -20,21 +20,25 @@ export const loginSchema = z.object({
 
 // Discussion schemas
 export const createDiscussionSchema = z.object({
-  startNumber: z.number()
-    .refine(val => Number.isFinite(val), 'Starting number must be a finite number'),
+  title: z.string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be 200 characters or less'),
+  content: z.string()
+    .min(1, 'Content is required')
+    .max(5000, 'Content must be 5000 characters or less'),
 })
 
-// Operation schemas
-export const createOperationSchema = z.object({
+// Reply schemas
+export const createReplySchema = z.object({
   discussionId: z.string().cuid(),
   parentId: z.string().cuid().optional().nullable(),
-  operationType: z.enum(['ADD', 'SUBTRACT', 'MULTIPLY', 'DIVIDE']),
-  rightOperand: z.number()
-    .refine(val => Number.isFinite(val), 'Right operand must be a finite number'),
+  content: z.string()
+    .min(1, 'Content is required')
+    .max(5000, 'Content must be 5000 characters or less'),
 })
 
 // Type exports for use in components
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type CreateDiscussionInput = z.infer<typeof createDiscussionSchema>
-export type CreateOperationInput = z.infer<typeof createOperationSchema>
+export type CreateReplyInput = z.infer<typeof createReplySchema>

@@ -24,10 +24,10 @@ export default async function HomePage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          Calculation Discussions
+          Discussion Forum
         </h1>
         <p className="text-gray-600">
-          Explore and participate in numeric conversation trees
+          Join conversations and share your thoughts with the community
         </p>
       </div>
 
